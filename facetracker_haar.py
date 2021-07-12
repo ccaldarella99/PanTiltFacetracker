@@ -5,12 +5,10 @@ Modified from code posted here: http://forums.pimoroni.com/t/pan-tilt-hat-repo/3
 """
 import numpy as np
 import cv2
-# import cv2.cv as cv
 import os
 import sys
 import time
 import pantilthat as pth
-# from pantilthat import *
 import argparse
 
 
@@ -87,7 +85,7 @@ def man_move_camera(key_press):
     return
 
 
-def move_camera(x, y, w, h, invert=1):
+def move_camera(x, y, w, h):
     """Takes in object tracking coordinates and
         moves camera to try to "center" the subject.
 
@@ -113,8 +111,8 @@ def move_camera(x, y, w, h, invert=1):
 
     cam_pan = pth.get_pan()
     cam_tilt = pth.get_tilt()
-    move_x = 2 * invert
-    move_y = 1 * invert
+    move_x = 2
+    move_y = 1
     yolo_offset = 0 if is_cascade else (h_min * -0.75)
 
     if(((x + w)*0.95 > w_max) & (x*0.95 < w_min)):
@@ -179,22 +177,11 @@ def reset_camera_position():
     time.sleep(2)
 
 
-# Deprecated
-# cascade = cv2.Load('/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml')
-# cascade = cv2.Load('/usr/share/opencv/lbpcascades/lbpcascade_frontalface.xml')
-
 cascade_path = '/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml' 
 if(is_cascade):
     cascade_path = '/usr/share/opencv/lbpcascades/lbpcascade_frontalface.xml'
 face_cascade = cv2.CascadeClassifier(cascade_path)
 
-# Use function instead:
-# cam_pan = 90
-# cam_tilt = 45
-
-# Turn the camera to the default position
-# pan(cam_pan-90)
-# tilt(cam_tilt-90)
 
 ## Lights removed at the moment ##
 # light_mode(WS2812)
@@ -209,22 +196,7 @@ face_cascade = cv2.CascadeClassifier(cascade_path)
 reset_camera_position()
 
 
-min_size = (15, 15)
-image_scale = 5
-haar_scale = 1.2
-min_neighbors = 2
-haar_flags = 0
-# Deprectated
-# haar_flags = cv2.HAAR_DO_CANNY_PRUNING
-
-
 cap = cv2.VideoCapture(0)
-# Deprecated
-# cap = cv2.CreateCameraCapture(0)
-# cv2.NamedWindow("Tracker", 1)
- 
-# if cap:
-#     frame_copy = None
     
 # Set placement vars
 FRAME_W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # width
@@ -241,34 +213,12 @@ while(True):
     if(not ret):
         print("Error getting image")
         continue
-    # Deprecated 
-    # Capture frame-by-frame
-    # frame = cv2.QueryFrame(cap)
-    # if not frame:
-    #     cv2.WaitKey(0)
-    #     break
-    # if not frame_copy:
-    #     frame_copy = cv2.CreateImage((frame.width,frame.height), cv2.IPL_DEPTH_8U, frame.nChannels)
-    # if frame.origin == cv2.IPL_ORIGIN_TL:
-    #     cv2.Flip(frame, frame, -1)
+
     frame = cv2.flip(frame, 0)
    
-    # Our operations on the frame come here
-    # gray = cv2.CreateImage((frame.width,frame.height), 8, 1)
-    # small_img = cv2.CreateImage((cv2.Round(frame.width / image_scale),
-    #                cv2.Round (frame.height / image_scale)), 8, 1)
- 
-    # convert color input image to grayscale
-    # cv2.CvtColor(frame, gray, cv2.BGR2GRAY)
     cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
  
-    # scale input image for faster processing
-    # cv2.Resize(gray, small_img, cv2.INTER_LINEAR)
- 
-    # cv2.EqualizeHist(small_img, small_img)
 
-    midFace = None
- 
     if(True):
         # t = cv2.GetTickCount()
         # HaarDetectObjects takes 0.02s
@@ -277,6 +227,8 @@ while(True):
         # t = cv2.GetTickCount() - t
         if(True):
         # if faces:
+
+
             # lights(50 if len(faces) == 0 else 0, 50 if len(faces) > 0 else 0,0,50)
 
             # for ((x, y, w, h), n) in faces:
@@ -326,11 +278,8 @@ while(True):
         cv2.rectangle(frame, (w_min, h_min), (w_max, h_max), (255, 0, 0), 2)
                 
     # Display the resulting frame
-    # cv2.ShowImage('Tracker',frame)
     cv2.imshow('Tracker', frame)
     
-    # if cv2.WaitKey(1) & 0xFF == ord('q'):
-    #     break
     key_stroke = cv2.waitKey(1)
     key_letter = key_stroke
     if key_stroke & 0xFF == ord('q'):
@@ -359,6 +308,5 @@ while(True):
 
 
 # When everything done, release the capture
-# cv2.DestroyWindow("Tracker")
 cap.release()
 cv2.destroyAllWindows()
